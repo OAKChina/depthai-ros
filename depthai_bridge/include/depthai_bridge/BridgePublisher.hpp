@@ -3,12 +3,13 @@
 #include <thread>
 #include <type_traits>
 #include <typeinfo>
+#include <chrono>
 
 #include "depthai/depthai.hpp"
 
 // #include <depthai_ros_msgs/DetectionDaiArray.h>
 // #include <vision_msgs/Detection2DArray.h>
-
+using namespace std::chrono_literals;
 #ifdef IS_ROS2
     #include <camera_info_manager/camera_info_manager.hpp>
     #include <image_transport/image_transport.hpp>
@@ -320,8 +321,11 @@ void BridgePublisher<RosMsg, SimMsg>::startPublisherThread() {
     _readingThread = std::thread([&]() {
         int messageCounter = 0;
         while(rosOrigin::ok()) {
-            // auto daiDataPtr = _daiMessageQueue->get<SimMsg>();
-            auto daiDataPtr = _daiMessageQueue->tryGet<SimMsg>();
+            bool isTimedOut = false;
+            // TODO(sachin): Add chrono
+            std::chrono::duration<Rep, Period> = 
+            auto daiDataPtr = _daiMessageQueue->get<SimMsg>(, isTimedOut);
+            // auto daiDataPtr = _daiMessageQueue->tryGet<SimMsg>();
             if(daiDataPtr == nullptr) {
                 messageCounter++;
                 if(messageCounter > 2000000) {
