@@ -8,7 +8,8 @@
 #include <string>
 
 #include "depthai/depthai.hpp"
-#include "depthai_bridge/RosParameters.hpp"
+// #include "depthai_bridge/depthaiUtility.hpp"
+#include "depthai_bridge/depthaiUtility.hpp"
 
 #ifndef IS_ROS2
 
@@ -20,6 +21,23 @@
     #include "depthai_ros_msgs/SetTemporal.h"
     #include "depthai_ros_msgs/SetThreshold.h"
     #include "ros/ros.h"
+#else
+
+    #include "depthai_ros_msgs/srv/set_decimation.hpp"
+    #include "depthai_ros_msgs/srv/set_median.hpp"
+    #include "depthai_ros_msgs/srv/set_post_processing.hpp"
+    #include "depthai_ros_msgs/srv/set_spatial.hpp"
+    #include "depthai_ros_msgs/srv/set_speckle.hpp"
+    #include "depthai_ros_msgs/srv/set_temporal.hpp"
+    #include "depthai_ros_msgs/srv/set_threshold.hpp"
+    #define req_type void
+#endif
+
+namespace dai {
+
+namespace ros {
+
+#ifndef IS_ROS2
 
 using pp_req_msg = depthai_ros_msgs::SetPostProcessing::Request&;
 using pp_rep_msg = depthai_ros_msgs::SetPostProcessing::Response&;
@@ -35,21 +53,9 @@ using trh_req_msg = depthai_ros_msgs::SetThreshold::Request&;
 using trh_rep_msg = depthai_ros_msgs::SetThreshold::Response&;
 using dcm_req_msg = depthai_ros_msgs::SetDecimation::Request&;
 using dcm_rep_msg = depthai_ros_msgs::SetDecimation::Response&;
-using ros_node = ros::NodeHandle&;
-    #define req_get(x) (request.x)
-    #define rep_get(x) (response.x)
-    #define set_parameter(a, b) getParamWithWarning(node, a, b)
-
+using ros_node = ::ros::NodeHandle&;
 #else
 
-    #include "depthai_ros_msgs/srv/set_decimation.hpp"
-    #include "depthai_ros_msgs/srv/set_median.hpp"
-    #include "depthai_ros_msgs/srv/set_post_processing.hpp"
-    #include "depthai_ros_msgs/srv/set_spatial.hpp"
-    #include "depthai_ros_msgs/srv/set_speckle.hpp"
-    #include "depthai_ros_msgs/srv/set_temporal.hpp"
-    #include "depthai_ros_msgs/srv/set_threshold.hpp"
-    #define req_type void
 using pp_req_msg = const std::shared_ptr<depthai_ros_msgs::srv::SetPostProcessing::Request>;
 using pp_rep_msg = std::shared_ptr<depthai_ros_msgs::srv::SetPostProcessing::Response>;
 using med_req_msg = const std::shared_ptr<depthai_ros_msgs::srv::SetMedian::Request>;
@@ -65,9 +71,6 @@ using trh_rep_msg = std::shared_ptr<depthai_ros_msgs::srv::SetThreshold::Respons
 using dcm_req_msg = const std::shared_ptr<depthai_ros_msgs::srv::SetDecimation::Request>;
 using dcm_rep_msg = std::shared_ptr<depthai_ros_msgs::srv::SetDecimation::Response>;
 using ros_node = std::shared_ptr<rclcpp::Node>;
-    #define req_get(x) ((*request).x)
-    #define rep_get(x) ((*response).x)
-    #define set_parameter(a, b) setRosParameter(node, a, b)
 #endif
 
 class DepthPostProcessing {
@@ -76,13 +79,13 @@ class DepthPostProcessing {
 
    public:
     // DepthPostProcessing();
-    DepthPostProcessing(ros_node node, std::string camName);
+    DepthPostProcessing(ros_node node, std::string stereoName);
     void setDevice(std::shared_ptr<dai::Device> device);
     void setFilters();
     dai::RawStereoDepthConfig getFilters(dai::RawStereoDepthConfig config);
     void setConfig(dai::RawStereoDepthConfig config);
 
-    req_type setPostProcessingRequest(pp_req_msg request, pp_rep_msg response);
+    req_type setDepthPostProcessingRequest(pp_req_msg request, pp_rep_msg response);
     req_type setMedianRequest(med_req_msg request, med_rep_msg response);
     req_type setSpeckleRequest(spk_req_msg request, spk_rep_msg response);
     req_type setTemporalRequest(tmp_req_msg request, tmp_rep_msg response);
@@ -111,8 +114,10 @@ class DepthPostProcessing {
     int _threshold_max = 0;
     int _threshold_min = 0;
     bool _decimation_enable = false;
-    std::string _decimation_mode = "NON_ZERO_MEDIAN";
+    std::string _decimation_mode = "NON_ZERO_MEDIAN", _stereoName;
     int _decimation_factor = 1;
     std::shared_ptr<dai::Device> _device;
     dai::RawStereoDepthConfig _config;
 };
+}  // namespace ros
+}  // namespace dai

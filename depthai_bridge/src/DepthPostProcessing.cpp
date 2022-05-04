@@ -1,28 +1,35 @@
 #include "depthai_bridge/DepthPostProcessing.hpp"
 
+namespace dai {
+
+namespace ros {
 using TemporalMode = dai::RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode;
 using DecimationMode = dai::RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode;
 
-DepthPostProcessing::DepthPostProcessing(ros_node node, std::string camName) {
-    set_parameter(camName + "/median_enable", _median_enable);
-    set_parameter(camName + "/median_mode", _median_mode);
-    set_parameter(camName + "/speckle_enable", _speckle_enable);
-    set_parameter(camName + "/speckle_range", _speckle_range);
-    set_parameter(camName + "/temporal_enable", _temporal_enable);
-    set_parameter(camName + "/temporal_mode", _temporal_mode);
-    set_parameter(camName + "/temporal_alpha", _temporal_alpha);
-    set_parameter(camName + "/temporal_delta", _temporal_delta);
-    set_parameter(camName + "/spatial_enable", _spatial_enable);
-    set_parameter(camName + "/spatial_radius", _spatial_radius);
-    set_parameter(camName + "/spatial_alpha", _spatial_alpha);
-    set_parameter(camName + "/spatial_delta", _spatial_delta);
-    set_parameter(camName + "/spatial_iterations", _spatial_iterations);
-    set_parameter(camName + "/threshold_enable", _threshold_enable);
-    set_parameter(camName + "/threshold_max", _threshold_max);
-    set_parameter(camName + "/threshold_min", _threshold_min);
-    set_parameter(camName + "/decimation_enable", _decimation_enable);
-    set_parameter(camName + "/decimation_mode", _decimation_mode);
-    set_parameter(camName + "/decimation_factor", _decimation_factor);
+DepthPostProcessing::DepthPostProcessing(ros_node node, std::string stereoName) : _stereoName(stereoName) {
+    set_parameter(stereoName + "/median_enable", _median_enable);
+    set_parameter(stereoName + "/median_mode", _median_mode);
+    set_parameter(stereoName + "/speckle_enable", _speckle_enable);
+    set_parameter(stereoName + "/speckle_range", _speckle_range);
+    set_parameter(stereoName + "/temporal_enable", _temporal_enable);
+    set_parameter(stereoName + "/temporal_mode", _temporal_mode);
+    set_parameter(stereoName + "/temporal_alpha", _temporal_alpha);
+    set_parameter(stereoName + "/temporal_delta", _temporal_delta);
+    set_parameter(stereoName + "/spatial_enable", _spatial_enable);
+    set_parameter(stereoName + "/spatial_radius", _spatial_radius);
+    set_parameter(stereoName + "/spatial_alpha", _spatial_alpha);
+    set_parameter(stereoName + "/spatial_delta", _spatial_delta);
+    set_parameter(stereoName + "/spatial_iterations", _spatial_iterations);
+    set_parameter(stereoName + "/threshold_enable", _threshold_enable);
+    set_parameter(stereoName + "/threshold_max", _threshold_max);
+    set_parameter(stereoName + "/threshold_min", _threshold_min);
+    set_parameter(stereoName + "/decimation_enable", _decimation_enable);
+    set_parameter(stereoName + "/decimation_mode", _decimation_mode);
+    set_parameter(stereoName + "/decimation_factor", _decimation_factor);
+}
+
+void DepthPostProcessing::setDevice(std::shared_ptr<dai::Device> device) {
+    _device = device;
 }
 
 dai::MedianFilter DepthPostProcessing::getMedianFilter() {
@@ -96,11 +103,7 @@ void DepthPostProcessing::setFilters() {
     stereo_config_queue->send(config_message);
 }
 
-void DepthPostProcessing::setDevice(std::shared_ptr<dai::Device> device) {
-    _device = device;
-}
-
-req_type DepthPostProcessing::setPostProcessingRequest(pp_req_msg request, pp_rep_msg response) {
+req_type DepthPostProcessing::setDepthPostProcessingRequest(pp_req_msg request, pp_rep_msg response) {
     _median_enable = req_get(median_enable);
     _median_mode = req_get(median_mode);
     _speckle_enable = req_get(speckle_enable);
@@ -184,3 +187,5 @@ req_type DepthPostProcessing::setDecimationRequest(dcm_req_msg request, dcm_rep_
     bool result = true;
     return (req_type)result;
 }
+}  // namespace ros
+}  // namespace dai

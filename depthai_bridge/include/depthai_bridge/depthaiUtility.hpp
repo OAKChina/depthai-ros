@@ -91,26 +91,41 @@ enum LogLevel { DEBUG, INFO, WARN, ERROR, FATAL };
 #ifdef IS_ROS2
 rclcpp::Time getFrameTime(rclcpp::Time rclBaseTime,
                           std::chrono::time_point<std::chrono::steady_clock> steadyBaseTime,
-                          std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration> currTimePoint) {
-    auto elapsedTime = currTimePoint - steadyBaseTime;
-    // uint64_t nSec = rosBaseTime.toNSec() + std::chrono::duration_cast<std::chrono::nanoseconds>(elapsedTime).count();
-    auto rclStamp = rclBaseTime + elapsedTime;
-    // DEPTHAI_ROS_DEBUG_STREAM("PRINT TIMESTAMP: ", "rosStamp -> " << rclStamp << "  rosBaseTime -> " << rclBaseTime);
-    return rclStamp;
+                          std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration> currTimePoint);
+
+template <typename T>
+static void setRosParameter(std::shared_ptr<rclcpp::Node> node, const char* key, T& val) {
+    node->declare_parameter(key, val);
+    node->get_parameter(key, val);
 }
+
+    #define req_type void
+    #define req_get(x) ((*request).x)
+    #define rep_get(x) ((*response).x)
+    #define set_parameter(a, b) setRosParameter(node, a, b)
 
 #else
 
+template <typename T>
+static void getParamWithWarning(::ros::NodeHandle& pnh, std::string key, T val) {
+    bool gotParam = pnh.getParam(key, val);
+    if(!gotParam) {
+        std::stringstream ss;
+        ss << val;
+        DEPTHAI_ROS_INFO_STREAM(pnh.getNamespace(), "Could not find param " << key << ". Defaulting to " << ss.str() << std::endl);
+    }
+}
+
+    #define req_type bool
+    #define req_get(x) (request.x)
+    #define rep_get(x) (response.x)
+    #define set_parameter(a, b) getParamWithWarning(node, a, b)
+
+
 ::ros::Time getFrameTime(::ros::Time rosBaseTime,
                          std::chrono::time_point<std::chrono::steady_clock> steadyBaseTime,
-                         std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration> currTimePoint) {
-    auto elapsedTime = currTimePoint - steadyBaseTime;
-    uint64_t nSec = rosBaseTime.toNSec() + std::chrono::duration_cast<std::chrono::nanoseconds>(elapsedTime).count();
-    auto currTime = rosBaseTime;
-    auto rosStamp = currTime.fromNSec(nSec);
-    DEPTHAI_ROS_DEBUG_STREAM("PRINT TIMESTAMP: ", "rosStamp -> " << rosStamp << "  rosBaseTime -> " << rosBaseTime);
-    return rosStamp;
-}
+                         std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration> currTimePoint);
+
 #endif
 
 template <typename T>

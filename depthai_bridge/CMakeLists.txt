@@ -76,7 +76,8 @@ if ( ament_cmake_FOUND )
     "src/SpatialDetectionConverter.cpp"
     "src/ImuConverter.cpp"
     "src/DepthPostProcessing.cpp"
-    "src/CameraControl.cpp"
+    "src/depthaiUtility.cpp"
+    # "src/CameraControl.cpp"
     )
 
     add_library(${PROJECT_NAME} SHARED ${LIB_SRC})
@@ -149,7 +150,8 @@ elseif( CATKIN_DEVEL_PREFIX OR CATKIN_BUILD_BINARY_PACKAGE )
     "src/SpatialDetectionConverter.cpp"
     "src/ImuConverter.cpp"
     "src/DepthPostProcessing.cpp"
-    "src/CameraControl.cpp"
+    "src/depthaiUtility.cpp"
+    # "src/CameraControl.cpp"
     )
     
     message(STATUS "------------------------------------------")
