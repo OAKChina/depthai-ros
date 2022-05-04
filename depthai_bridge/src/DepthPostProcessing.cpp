@@ -99,7 +99,7 @@ void DepthPostProcessing::setConfig(dai::RawStereoDepthConfig config) {
 void DepthPostProcessing::setFilters() {
     auto config_message = dai::StereoDepthConfig();
     config_message.set(getFilters(_config));
-    auto stereo_config_queue = _device->getInputQueue("config_stereo");
+    auto stereo_config_queue = _device->getInputQueue("stereoDepthConfig");
     stereo_config_queue->send(config_message);
 }
 

@@ -107,7 +107,7 @@ static void setRosParameter(std::shared_ptr<rclcpp::Node> node, const char* key,
 #else
 
 template <typename T>
-static void getParamWithWarning(::ros::NodeHandle& pnh, std::string key, T val) {
+static void getParamWithWarning(::ros::NodeHandle& pnh, std::string key, T& val) {
     bool gotParam = pnh.getParam(key, val);
     if(!gotParam) {
         std::stringstream ss;
