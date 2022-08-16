@@ -414,7 +414,7 @@ int main(int argc, char** argv) {
         height = 480;
     }
 
-    if(boardName.find("PRO") != std::string::npos) {
+    // if(boardName.find("PRO") != std::string::npos) {
         if(enableDotProjector) {
             device->setIrLaserDotProjectorBrightness(dotProjectormA);
         }
@@ -422,7 +422,7 @@ int main(int argc, char** argv) {
         if(enableFloodLight) {
             device->setIrFloodLightBrightness(floodLightmA);
         }
-    }
+    // }
 
     dai::rosBridge::ImageConverter converter(tfPrefix + "_left_camera_optical_frame", true);
     dai::rosBridge::ImageConverter rightconverter(tfPrefix + "_right_camera_optical_frame", true);
