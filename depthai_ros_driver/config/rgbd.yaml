@@ -1,4 +1,2 @@
-/oak:
-  ros__parameters:
-    camera:
-      i_nn_type: none
+camera:
+  i_nn_type: none

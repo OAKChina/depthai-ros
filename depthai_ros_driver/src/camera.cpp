@@ -43,6 +43,7 @@ void Camera::stopCB(const Trigger::Request::SharedPtr /*req*/, Trigger::Response
     res->success = true;
 }
 void Camera::getDeviceType() {
+
     pipeline = std::make_shared<dai::Pipeline>();
     startDevice();
     auto name = device->getDeviceName();
@@ -130,7 +131,7 @@ void Camera::startDevice() {
     } else if(!ip.empty()) {
     }
     rclcpp::Rate r(1.0);
-    bool cam_running;
+    bool cam_running=false;
     std::vector<dai::DeviceInfo> availableDevices = dai::Device::getAllAvailableDevices();
     while(!cam_running) {
         try {
