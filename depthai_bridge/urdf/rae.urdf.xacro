@@ -5,6 +5,8 @@
     <link name="chassis">
       <inertial>
         <mass value="1.0"/>
+        <mu1 value="0.001"/>
+        <mu2 value="0.001"/>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <inertia
           ixx = "0.166667"
@@ -104,11 +106,6 @@
       </visual>
     </link>
 
-    <joint name="base_joint" type="fixed">
-        <parent link="base_frame"/>
-        <child link="chassis"/>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
 
     <joint name='left_wheel_hinge' type='revolute'>
       <origin rpy="0.0 0.0 0.0 " xyz="-0.0497 0.00518 -0.03048"/>
@@ -125,6 +122,21 @@
       <axis rpy="0 0 0" xyz="1 0 0"/>
       <limit lower="-1e+16" upper="1e+16" effort="100" velocity="100"/>
     </joint>
+    
+    <gazebo>
+        <plugin
+                filename="libignition-gazebo-diff-drive-system.so"
+                name="ignition::gazebo::systems::DiffDrive">
+                <left_joint>left_wheel_hinge</left_joint>
+                <right_joint>right_wheel_hinge</right_joint>
+                <wheel_separation>0.0994</wheel_separation>
+                <!-- check correct wheel radius when you come back to the task -->
+                <wheel_radius>0.0115</wheel_radius>
+                <odom_publish_frequency>1</odom_publish_frequency>
+                <topic>cmd_vel</topic>
+            </plugin>
+       
+    </gazebo>
 
     <!-- <link name='body'>
       <inertial>
@@ -138,7 +150,6 @@
           izz = "0.166667"
         />
       </inertial>
-
       
       <visual>
         <pose>0 0 0 0 -0 0</pose>
