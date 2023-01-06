@@ -28,7 +28,7 @@ def generate_launch_description():
     # worth thinking about moving base link to a midpoint between wheels for easier/more intuitive tfs
     publish_robot_info = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(depthai_bridge, 'launch', 'rae_desc_launch.py')),
+            os.path.join(depthai_bridge, 'launch', 'rae_gazebo_desc_launch.py')),
     )
     #TODO Danilo  - launch file expects to be called inside src/depthai-ros folder in order to find meshes - either hardcore where meshes are or find different solution 
     spawn_robot=Node(
