@@ -34,7 +34,7 @@ def generate_launch_description():
     spawn_robot=Node(
         package='ros_ign_gazebo',
         executable='create',
-        arguments=['-topic', '/robot_description', '-z', '0.05'
+        arguments=['-topic', '/robot_description', '-z', '0.15'
                    ],
         output='screen'
     )
