@@ -20,6 +20,8 @@ class BaseParamHandler {
     T getParam(ros::NodeHandle node, const std::string& paramName) {
         T value;
         node.getParam(getFullParamName(node, paramName), value);
+        logParam(getFullParamName(node, paramName), value);
+
         return value;
     }
     template <typename T>
@@ -28,6 +30,8 @@ class BaseParamHandler {
         if(!node.param<T>(getFullParamName(node, paramName), value, defaultVal)) {
             node.setParam(getFullParamName(node, paramName), defaultVal);
         }
+        logParam(getFullParamName(node, paramName), value);
+
         return value;
     }
     template <typename T>
@@ -45,7 +49,7 @@ class BaseParamHandler {
     inline void logParam(const std::string& name, T value) {
         std::stringstream ss;
         ss << value;
-        ROS_DEBUG("Param %s with value %s", name.c_str(), ss.str().c_str());
+        ROS_INFO("Param %s with value %s", name.c_str(), ss.str().c_str());
     }
     template <typename T>
     inline void logParam(const std::string& name, const std::vector<T>& value) {
@@ -53,7 +57,7 @@ class BaseParamHandler {
         for(const auto& v : value) {
             ss << v << " ";
         }
-        ROS_DEBUG("Param %s with value %s", name.c_str(), ss.str().c_str());
+        ROS_INFO("Param %s with value %s", name.c_str(), ss.str().c_str());
     }
 };
 }  // namespace param_handlers

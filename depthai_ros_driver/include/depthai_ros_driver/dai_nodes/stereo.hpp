@@ -28,22 +28,24 @@ class Stereo : public BaseNode {
     void closeQueues() override;
 
    private:
+    void setupRectifiedLeftQueue(std::shared_ptr<dai::Device> device);
+    void setupRectifiedRightQueue(std::shared_ptr<dai::Device> device);
+    void setupStereoQueue(std::shared_ptr<dai::Device> device);
     void stereoQCB(const std::string& name, const std::shared_ptr<dai::ADatatype>& data);
-    std::unique_ptr<dai::ros::ImageConverter> imageConverter;
+    std::unique_ptr<dai::ros::ImageConverter> stereoImageConverter, leftImageConverter, rightImageConverter;
     image_transport::ImageTransport it;
-    image_transport::CameraPublisher stereoPub;
-    sensor_msgs::CameraInfo stereoInfo;
+    image_transport::CameraPublisher stereoPub, leftRectPub, rightRectPub;
+    sensor_msgs::CameraInfo stereoInfo, leftRectInfo, rightRectInfo;
     std::shared_ptr<dai::node::StereoDepth> stereoCamNode;
-    std::shared_ptr<dai::node::VideoEncoder> videoEnc;
-    std::shared_ptr<dai::node::ImageManip> imageManip;
+    std::shared_ptr<dai::node::VideoEncoder> stereoEnc, leftRectEnc, rightRectEnc;
     std::unique_ptr<BaseNode> left;
     std::unique_ptr<BaseNode> right;
     std::unique_ptr<param_handlers::StereoParamHandler> ph;
-    std::shared_ptr<dai::DataOutputQueue> stereoQ;
+    std::shared_ptr<dai::DataOutputQueue> stereoQ, leftRectQ, rightRectQ;
     std::shared_ptr<dai::DataInputQueue> controlQ;
-    std::shared_ptr<dai::node::XLinkOut> xoutStereo;
+    std::shared_ptr<dai::node::XLinkOut> xoutStereo, xoutLeftRect, xoutRightRect;
     std::shared_ptr<dai::node::XLinkIn> xinControl;
-    std::string stereoQName;
+    std::string stereoQName, leftRectQName, rightRectQName;
 };
 
 }  // namespace dai_nodes
