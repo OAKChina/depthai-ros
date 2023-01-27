@@ -34,7 +34,7 @@ void MonoParamHandler::declareParams(
         monoCam->initialControl.setManualExposure(exposure, iso);
     }
 }
-dai::CameraControl MonoParamHandler::setRuntimeParams(ros::NodeHandle node, parametersConfig& config) {
+dai::CameraControl MonoParamHandler::setRuntimeParams(ros::NodeHandle node, cameraConfig& config) {
     dai::CameraControl ctrl;
     if(getName() == "left") {
         if(config.left_r_set_man_exposure) {

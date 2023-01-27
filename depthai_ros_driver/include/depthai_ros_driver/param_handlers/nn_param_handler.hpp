@@ -91,7 +91,7 @@ class NNParamHandler : public BaseParamHandler {
         }
     }
 
-    dai::CameraControl setRuntimeParams(ros::NodeHandle node, parametersConfig& config) override;
+    dai::CameraControl setRuntimeParams(ros::NodeHandle node, cameraConfig& config) override;
     std::vector<std::string> getLabels();
 
    private:

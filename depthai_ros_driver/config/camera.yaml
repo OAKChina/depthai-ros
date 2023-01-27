@@ -117,6 +117,8 @@ oak:
   stereo_i_lr_check: true
   stereo_i_lrc_threshold: 10
   stereo_i_max_q_size: 30
+  stereo_i_publish_rect_left: false
+  stereo_i_publish_rect_right: false
   stereo_i_rectify_edge_fill_color: 0
   stereo_i_spatial_filter_alpha: 0.5
   stereo_i_spatial_filter_delta: 20

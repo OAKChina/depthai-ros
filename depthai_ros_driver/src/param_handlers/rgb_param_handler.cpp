@@ -68,7 +68,7 @@ void RGBParamHandler::declareParams(ros::NodeHandle node,
         colorCam->initialControl.setManualWhiteBalance(whitebalance);
     }
 }
-dai::CameraControl RGBParamHandler::setRuntimeParams(ros::NodeHandle node, parametersConfig& config) {
+dai::CameraControl RGBParamHandler::setRuntimeParams(ros::NodeHandle node, cameraConfig& config) {
     dai::CameraControl ctrl;
 
     if(getName() == "rgb") {

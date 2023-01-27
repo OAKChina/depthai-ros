@@ -3,7 +3,7 @@
 #include "depthai/depthai.hpp"
 #include "depthai_ros_driver/dai_nodes/base_node.hpp"
 #include "depthai_ros_driver/param_handlers/camera_param_handler.hpp"
-#include "depthai_ros_driver/parametersConfig.h"
+#include "depthai_ros_driver/cameraConfig.h"
 #include "dynamic_reconfigure/server.h"
 #include "nodelet/nodelet.h"
 #include "ros/ros.h"
@@ -24,8 +24,8 @@ class Camera : public nodelet::Nodelet {
     void rgbPipeline();
     void setupQueues();
     void setIR();
-    void parameterCB(parametersConfig& config, uint32_t level);
-    std::shared_ptr<dynamic_reconfigure::Server<parametersConfig>> paramServer;
+    void parameterCB(cameraConfig& config, uint32_t level);
+    std::shared_ptr<dynamic_reconfigure::Server<cameraConfig>> paramServer;
     std::unique_ptr<param_handlers::CameraParamHandler> ph;
     ros::ServiceServer startSrv, stopSrv;
     bool startCB(Trigger::Request& /*req*/, Trigger::Response& res);

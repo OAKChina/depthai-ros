@@ -123,7 +123,7 @@ std::string NNParamHandler::getModelPath(const nlohmann::json& data) {
     return modelPath;
 }
 
-dai::CameraControl NNParamHandler::setRuntimeParams(ros::NodeHandle node, parametersConfig& config) {
+dai::CameraControl NNParamHandler::setRuntimeParams(ros::NodeHandle node, cameraConfig& config) {
     dai::CameraControl ctrl;
     return ctrl;
 }

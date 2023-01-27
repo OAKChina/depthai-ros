@@ -11,7 +11,7 @@ namespace depthai_ros_driver {
 
 void Camera::onInit() {
     pNH = getPrivateNodeHandle();
-    paramServer = std::make_shared<dynamic_reconfigure::Server<parametersConfig>>(pNH);
+    paramServer = std::make_shared<dynamic_reconfigure::Server<cameraConfig>>(pNH);
     paramServer->setCallback(std::bind(&Camera::parameterCB, this, std::placeholders::_1, std::placeholders::_2));
     ph = std::make_unique<param_handlers::CameraParamHandler>("camera");
     ph->declareParams(pNH);
@@ -20,7 +20,7 @@ void Camera::onInit() {
     stopSrv = pNH.advertiseService("stop_camera", &Camera::stopCB, this);
 }
 
-void Camera::parameterCB(parametersConfig& config, uint32_t /*level*/) {
+void Camera::parameterCB(cameraConfig& config, uint32_t /*level*/) {
     enableIR = config.camera_i_enable_ir;
     floodlightBrighness = config.camera_i_floodlight_brightness;
     laserDotBrightness = config.camera_i_laser_dot_brightness;

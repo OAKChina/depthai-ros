@@ -2,7 +2,7 @@
 
 #include "depthai/depthai.hpp"
 #include "depthai/pipeline/nodes.hpp"
-#include "depthai_ros_driver/parametersConfig.h"
+#include "depthai_ros_driver/cameraConfig.h"
 
 namespace depthai_ros_driver {
 namespace param_handlers {
@@ -31,7 +31,7 @@ void CameraParamHandler::declareParams(ros::NodeHandle node) {
     getParam<int>(node, "i_laser_dot_brightness");
     getParam<int>(node, "i_floodlight_brightness");
 }
-dai::CameraControl CameraParamHandler::setRuntimeParams(ros::NodeHandle /*node*/, parametersConfig& /*config*/) {
+dai::CameraControl CameraParamHandler::setRuntimeParams(ros::NodeHandle /*node*/, cameraConfig& /*config*/) {
     dai::CameraControl ctrl;
     return ctrl;
 }

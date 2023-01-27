@@ -53,7 +53,7 @@ void Imu::link(const dai::Node::Input& in, int /*linkType*/) {
     imuNode->out.link(in);
 }
 
-void Imu::updateParams(parametersConfig& config) {
+void Imu::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
 }
 

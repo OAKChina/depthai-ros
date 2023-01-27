@@ -5,7 +5,7 @@
 #include "depthai_ros_driver/dai_nodes/base_node.hpp"
 #include "depthai_ros_driver/dai_nodes/sensors/sensor_helpers.hpp"
 #include "depthai_ros_driver/param_handlers/rgb_param_handler.hpp"
-#include "depthai_ros_driver/parametersConfig.h"
+#include "depthai_ros_driver/cameraConfig.h"
 #include "image_transport/camera_publisher.h"
 #include "image_transport/image_transport.h"
 #include "ros/ros.h"
@@ -23,7 +23,7 @@ class RGB : public BaseNode {
                  sensor_helpers::ImageSensor sensor,
                  bool publish);
     virtual ~RGB() = default;
-    void updateParams(parametersConfig& config) override;
+    void updateParams(cameraConfig& config) override;
     void setupQueues(std::shared_ptr<dai::Device> device) override;
     void link(const dai::Node::Input& in, int linkType = 0) override;
     void setNames() override;
@@ -31,7 +31,6 @@ class RGB : public BaseNode {
     void closeQueues() override;
 
    private:
-    void colorQCB(const std::string& name, const std::shared_ptr<dai::ADatatype>& data);
     std::unique_ptr<dai::ros::ImageConverter> imageConverter;
     image_transport::ImageTransport it;
     image_transport::CameraPublisher rgbPub, previewPub;

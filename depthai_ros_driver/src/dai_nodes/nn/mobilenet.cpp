@@ -32,8 +32,7 @@ void Mobilenet::setXinXout(std::shared_ptr<dai::Pipeline> pipeline) {
 
 void Mobilenet::setupQueues(std::shared_ptr<dai::Device> device) {
     nnQ = device->getOutputQueue(nnQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
-    auto tfPrefix = std::string(getROSNode().getNamespace());
-    tfPrefix.erase(0, 1);
+    auto tfPrefix = getTFPrefix();
     detConverter = std::make_unique<dai::ros::ImgDetectionConverter>(
         tfPrefix + "_rgb_camera_optical_frame", imageManip->initialConfig.getResizeConfig().width, imageManip->initialConfig.getResizeConfig().height, false);
     nnQ->addCallback(std::bind(&Mobilenet::mobilenetCB, this, std::placeholders::_1, std::placeholders::_2));
@@ -62,7 +61,7 @@ dai::Node::Input Mobilenet::getInput(int linkType) {
     return imageManip->inputImage;
 }
 
-void Mobilenet::updateParams(parametersConfig& config) {
+void Mobilenet::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
 }
 

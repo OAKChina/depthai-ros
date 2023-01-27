@@ -18,7 +18,7 @@ class MonoParamHandler : public BaseParamHandler {
                        dai::CameraBoardSocket socket,
                        dai_nodes::sensor_helpers::ImageSensor sensor,
                        bool publish);
-    dai::CameraControl setRuntimeParams(ros::NodeHandle node, parametersConfig& config) override;
+    dai::CameraControl setRuntimeParams(ros::NodeHandle node, cameraConfig& config) override;
 
    private:
     std::unordered_map<std::string, dai::MonoCameraProperties::SensorResolution> monoResolutionMap;

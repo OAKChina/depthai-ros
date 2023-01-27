@@ -1,0 +1,5 @@
+oak:
+  camera_i_pipeline_type: RGBD
+  camera_i_nn_type: none
+  right_i_publish_topic: true
+  stereo_i_output_disparity: true

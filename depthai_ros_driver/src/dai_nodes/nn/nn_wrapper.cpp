@@ -49,7 +49,7 @@ dai::Node::Input NNWrapper::getInput(int linkType) {
     return nnNode->getInput(linkType);
 }
 
-void NNWrapper::updateParams(parametersConfig& config) {
+void NNWrapper::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
     nnNode->updateParams(config);
 }

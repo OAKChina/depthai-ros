@@ -34,8 +34,7 @@ void SpatialMobilenet::setXinXout(std::shared_ptr<dai::Pipeline> pipeline) {
 
 void SpatialMobilenet::setupQueues(std::shared_ptr<dai::Device> device) {
     nnQ = device->getOutputQueue(nnQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
-    auto tfPrefix = std::string(getROSNode().getNamespace());
-    tfPrefix.erase(0, 1);
+    auto tfPrefix = getTFPrefix();
     detConverter = std::make_unique<dai::ros::SpatialDetectionConverter>(
         tfPrefix + "_rgb_camera_optical_frame", imageManip->initialConfig.getResizeConfig().width, imageManip->initialConfig.getResizeConfig().height, false);
     nnQ->addCallback(std::bind(&SpatialMobilenet::mobilenetCB, this, std::placeholders::_1, std::placeholders::_2));
@@ -68,7 +67,7 @@ dai::Node::Input SpatialMobilenet::getInput(int linkType) {
     }
 }
 
-void SpatialMobilenet::updateParams(parametersConfig& config) {
+void SpatialMobilenet::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
 }
 

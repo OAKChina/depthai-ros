@@ -3,7 +3,9 @@
 #include "depthai/depthai.hpp"
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
-#include "depthai_ros_driver/parametersConfig.h"
+#include "depthai_bridge/ImageConverter.hpp"
+#include "depthai_ros_driver/cameraConfig.h"
+#include "image_transport/camera_publisher.h"
 #include "ros/ros.h"
 
 namespace depthai_ros_driver {
@@ -15,7 +17,7 @@ class BaseNode {
         setROSNodePointer(node);
     };
     virtual ~BaseNode(){};
-    virtual void updateParams(parametersConfig& config) = 0;
+    virtual void updateParams(cameraConfig& config) = 0;
     virtual void link(const dai::Node::Input& in, int linkType = 0) = 0;
     virtual dai::Node::Input getInput(int /*linkType = 0*/) {
         throw(std::runtime_error("getInput() not implemented"));
@@ -37,7 +39,7 @@ class BaseNode {
     std::string getName() {
         return baseDAINodeName;
     };
-    std::string getTFPrefix(const std::string& frameName){
+    std::string getTFPrefix(const std::string& frameName = "") {
         auto prefix = std::string(getROSNode().getNamespace()) + "_" + frameName;
         prefix.erase(0, 1);
         return prefix;

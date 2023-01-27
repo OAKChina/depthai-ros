@@ -48,7 +48,7 @@ dai::Node::Input SpatialNNWrapper::getInput(int linkType) {
     return nnNode->getInput(linkType);
 }
 
-void SpatialNNWrapper::updateParams(parametersConfig& config) {
+void SpatialNNWrapper::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
     nnNode->updateParams(config);
 }

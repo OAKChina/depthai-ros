@@ -3,6 +3,7 @@
 #include "cv_bridge/cv_bridge.h"
 #include "depthai_bridge/ImageConverter.hpp"
 #include "depthai_ros_driver/dai_nodes/sensors/camera_sensor.hpp"
+#include "depthai_ros_driver/dai_nodes/sensors/sensor_helpers.hpp"
 #include "image_transport/camera_publisher.h"
 #include "image_transport/image_transport.h"
 namespace depthai_ros_driver {
@@ -32,9 +33,7 @@ void Stereo::setXinXout(std::shared_ptr<dai::Pipeline> pipeline) {
     xoutStereo = pipeline->create<dai::node::XLinkOut>();
     xoutStereo->setStreamName(stereoQName);
     if(ph->getParam<bool>(getROSNode(), "i_low_bandwidth")) {
-        stereoEnc = pipeline->create<dai::node::VideoEncoder>();
-        stereoEnc->setQuality(ph->getParam<int>(getROSNode(), "i_low_bandwidth_quality"));
-        stereoEnc->setProfile(dai::VideoEncoderProperties::Profile::MJPEG);
+        stereoEnc = sensor_helpers::createEncoder(pipeline, ph->getParam<int>(getROSNode(), "i_low_bandwidth_quality"));
         stereoCamNode->disparity.link(stereoEnc->input);
         stereoEnc->bitstream.link(xoutStereo->input);
     } else {
@@ -44,67 +43,68 @@ void Stereo::setXinXout(std::shared_ptr<dai::Pipeline> pipeline) {
             stereoCamNode->depth.link(xoutStereo->input);
         }
     }
-    if(ph->getParam<bool>(getROSNode(), "i_publish_left_rect")) {
+    if(ph->getParam<bool>(getROSNode(), "i_publish_rect_left")) {
         xoutLeftRect = pipeline->create<dai::node::XLinkOut>();
         xoutLeftRect->setStreamName(leftRectQName);
         if(ph->getParam<bool>(getROSNode(), "i_rect_left_low_bandwidth")) {
-            leftRectEnc = pipeline->create<dai::node::VideoEncoder>();
-            leftRectEnc->setQuality(50);
-            leftRectEnc->setProfile(dai::VideoEncoderProperties::Profile::MJPEG);
+            leftRectEnc = sensor_helpers::createEncoder(pipeline, ph->getParam<int>(getROSNode(), "i_rect_left_low_bandwidth_quality"));
             stereoCamNode->rectifiedLeft.link(leftRectEnc->input);
             leftRectEnc->bitstream.link(xoutLeftRect->input);
         } else {
             stereoCamNode->rectifiedLeft.link(xoutLeftRect->input);
         }
     }
-    if(ph->getParam<bool>(getROSNode(), "i_publish_right_rect")) {
+    if(ph->getParam<bool>(getROSNode(), "i_publish_rect_right")) {
         xoutRightRect = pipeline->create<dai::node::XLinkOut>();
         xoutRightRect->setStreamName(rightRectQName);
         if(ph->getParam<bool>(getROSNode(), "i_rect_right_low_bandwidth")) {
-            rightRectEnc = pipeline->create<dai::node::VideoEncoder>();
-            rightRectEnc->setQuality(50);
-            rightRectEnc->setProfile(dai::VideoEncoderProperties::Profile::MJPEG);
+            rightRectEnc = sensor_helpers::createEncoder(pipeline, ph->getParam<int>(getROSNode(), "i_rect_right_low_bandwidth_quality"));
             stereoCamNode->rectifiedRight.link(rightRectEnc->input);
-            rightRectEnc->bitstream.link(xoutLeftRect->input);
+            rightRectEnc->bitstream.link(xoutRightRect->input);
         } else {
-            stereoCamNode->rectifiedRight.link(xoutLeftRect->input);
+            stereoCamNode->rectifiedRight.link(xoutRightRect->input);
         }
     }
 }
-void Stereo::setupRectifiedLeftQueue(std::shared_ptr<dai::Device> device){
+void Stereo::setupRectifiedLeftQueue(std::shared_ptr<dai::Device> device) {
     leftRectQ = device->getOutputQueue(leftRectQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
     auto leftTFPrefix = getTFPrefix("left");
     leftImageConverter = std::make_unique<dai::ros::ImageConverter>(leftTFPrefix + "_camera_optical_frame", false);
-    stereoQ->addCallback(std::bind(&Stereo::stereoQCB, this, std::placeholders::_1, std::placeholders::_2));
-    leftRectPub = it.advertiseCamera(getName() + "/left_rect", 1);
-    auto calibHandler = device->readCalibration();
-    try {
-        leftRectInfo = leftImageConverter->calibrationToCameraInfo(calibHandler,
-                                                             dai::CameraBoardSocket::LEFT);
-    } catch(std::runtime_error& e) {
-        ROS_ERROR("No calibration! Publishing empty camera_info.");
+    leftRectPub = it.advertiseCamera(getName() + "/left/rect", 1);
+    leftRectInfo = sensor_helpers::getCalibInfo(*leftImageConverter, device, dai::CameraBoardSocket::LEFT);
+    if(ph->getParam<bool>(getROSNode(), "i_rect_left_low_bandwidth")) {
+        leftRectQ->addCallback(std::bind(&sensor_helpers::compressedImgCB,
+                                         std::placeholders::_1,
+                                         std::placeholders::_2,
+                                         *leftImageConverter,
+                                         leftRectPub,
+                                         leftRectInfo,
+                                         dai::RawImgFrame::Type::GRAY8));
+    } else {
+        leftRectQ->addCallback(std::bind(sensor_helpers::imgCB, std::placeholders::_1, std::placeholders::_2, *leftImageConverter, leftRectPub, leftRectInfo));
     }
-
-    
-    
 }
-void Stereo::setupRectifiedRightQueue(std::shared_ptr<dai::Device> device){
-rightRectQ = device->getOutputQueue(rightRectQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
+void Stereo::setupRectifiedRightQueue(std::shared_ptr<dai::Device> device) {
+    rightRectQ = device->getOutputQueue(rightRectQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
     auto rightTFPrefix = getTFPrefix("right");
     rightImageConverter = std::make_unique<dai::ros::ImageConverter>(rightTFPrefix + "_camera_optical_frame", false);
-    rightRectQ->addCallback(std::bind(&Stereo::stereoQCB, this, std::placeholders::_1, std::placeholders::_2));
-    rightRectPub = it.advertiseCamera(getName() + "/right_rect", 1);
-    auto calibHandler = device->readCalibration();
-
-    try {
-        rightRectInfo = rightImageConverter->calibrationToCameraInfo(calibHandler,
-                                                             dai::CameraBoardSocket::RIGHT);
-    } catch(std::runtime_error& e) {
-        ROS_ERROR("No calibration! Publishing empty camera_info.");
+    rightRectPub = it.advertiseCamera(getName() + "/right/rect", 1);
+    rightRectInfo = sensor_helpers::getCalibInfo(*rightImageConverter, device, dai::CameraBoardSocket::RIGHT);
+    if(ph->getParam<bool>(getROSNode(), "i_rect_right_low_bandwidth")) {
+        rightRectQ->addCallback(std::bind(sensor_helpers::compressedImgCB,
+                                          std::placeholders::_1,
+                                          std::placeholders::_2,
+                                          *rightImageConverter,
+                                          rightRectPub,
+                                          rightRectInfo,
+                                          dai::RawImgFrame::Type::GRAY8));
+    } else {
+        rightRectQ->addCallback(
+            std::bind(sensor_helpers::imgCB, std::placeholders::_1, std::placeholders::_2, *rightImageConverter, rightRectPub, rightRectInfo));
     }
 }
 
-void Stereo::setupStereoQueue(std::shared_ptr<dai::Device> device){
+void Stereo::setupStereoQueue(std::shared_ptr<dai::Device> device) {
     stereoQ = device->getOutputQueue(stereoQName, ph->getParam<int>(getROSNode(), "i_max_q_size"), false);
     std::string tfPrefix;
     if(ph->getParam<bool>(getROSNode(), "i_align_depth")) {
@@ -113,17 +113,38 @@ void Stereo::setupStereoQueue(std::shared_ptr<dai::Device> device){
         tfPrefix = getTFPrefix("right");
     }
     stereoImageConverter = std::make_unique<dai::ros::ImageConverter>(tfPrefix + "_camera_optical_frame", false);
-    stereoQ->addCallback(std::bind(&Stereo::stereoQCB, this, std::placeholders::_1, std::placeholders::_2));
+
     stereoPub = it.advertiseCamera(getName() + "/image_raw", 1);
+
+    stereoInfo = sensor_helpers::getCalibInfo(*stereoImageConverter,
+                                              device,
+                                              static_cast<dai::CameraBoardSocket>(ph->getParam<int>(getROSNode(), "i_board_socket_id")),
+                                              ph->getParam<int>(getROSNode(), "i_width"),
+                                              ph->getParam<int>(getROSNode(), "i_height"));
     auto calibHandler = device->readCalibration();
-    try {
-        stereoInfo = stereoImageConverter->calibrationToCameraInfo(calibHandler,
-                                                             static_cast<dai::CameraBoardSocket>(ph->getParam<int>(getROSNode(), "i_board_socket_id")),
-                                                             ph->getParam<int>(getROSNode(), "i_width"),
-                                                             ph->getParam<int>(getROSNode(), "i_height"));
-        stereoInfo.P[3] = calibHandler.getBaselineDistance() * 10.0;  // baseline in mm
-    } catch(std::runtime_error& e) {
-        ROS_ERROR("No calibration! Publishing empty camera_info.");
+    stereoInfo.P[3] = calibHandler.getBaselineDistance() * 10.0;  // baseline in mm
+    if(ph->getParam<bool>(getROSNode(), "i_low_bandwidth")) {
+        if(ph->getParam<bool>(getROSNode(), "i_output_disparity")) {
+            stereoQ->addCallback(std::bind(sensor_helpers::compressedImgCB,
+                                           std::placeholders::_1,
+                                           std::placeholders::_2,
+                                           *stereoImageConverter,
+                                           stereoPub,
+                                           stereoInfo,
+                                           dai::RawImgFrame::Type::GRAY8));
+        } else {
+            // converting disp->depth
+            stereoQ->addCallback(std::bind(sensor_helpers::compressedImgCB,
+                                           std::placeholders::_1,
+                                           std::placeholders::_2,
+                                           *stereoImageConverter,
+                                           stereoPub,
+                                           stereoInfo,
+                                           dai::RawImgFrame::Type::RAW8));
+        }
+    } else {
+        stereoQ->addCallback(
+            std::bind(sensor_helpers::imgCB, std::placeholders::_1, std::placeholders::_2, *stereoImageConverter, stereoPub, stereoInfo));
     }
 }
 
@@ -131,10 +152,10 @@ void Stereo::setupQueues(std::shared_ptr<dai::Device> device) {
     left->setupQueues(device);
     right->setupQueues(device);
     setupStereoQueue(device);
-    if(ph->getParam<bool>(getROSNode(), "i_publish_left_rect")) {
+    if(ph->getParam<bool>(getROSNode(), "i_publish_rect_left")) {
         setupRectifiedLeftQueue(device);
     }
-    if(ph->getParam<bool>(getROSNode(), "i_publish_right_rect")) {
+    if(ph->getParam<bool>(getROSNode(), "i_publish_rect_right")) {
         setupRectifiedRightQueue(device);
     }
 }
@@ -142,20 +163,8 @@ void Stereo::closeQueues() {
     left->closeQueues();
     right->closeQueues();
     stereoQ->close();
-}
-void Stereo::stereoQCB(const std::string& /*name*/, const std::shared_ptr<dai::ADatatype>& data) {
-    auto img = std::dynamic_pointer_cast<dai::ImgFrame>(data);
-    std::deque<sensor_msgs::Image> deq;
-    if(ph->getParam<bool>(getROSNode(), "i_low_bandwidth"))
-        stereoImageConverter->toRosMsgFromBitStream(img, deq, dai::RawImgFrame::Type::RAW8, stereoInfo);
-    else
-        stereoImageConverter->toRosMsg(img, deq);
-    while(deq.size() > 0) {
-        auto currMsg = deq.front();
-        stereoInfo.header = currMsg.header;
-        stereoPub.publish(currMsg, stereoInfo);
-        deq.pop_front();
-    }
+    leftRectQ->close();
+    rightRectQ->close();
 }
 
 void Stereo::link(const dai::Node::Input& in, int /*linkType*/) {
@@ -172,7 +181,7 @@ dai::Node::Input Stereo::getInput(int linkType) {
     }
 }
 
-void Stereo::updateParams(parametersConfig& config) {
+void Stereo::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
 }
 

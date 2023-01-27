@@ -13,7 +13,7 @@ class CameraParamHandler : public BaseParamHandler {
     explicit CameraParamHandler(const std::string& name);
     ~CameraParamHandler();
     void declareParams(ros::NodeHandle node);
-    dai::CameraControl setRuntimeParams(ros::NodeHandle node, parametersConfig& config) override;
+    dai::CameraControl setRuntimeParams(ros::NodeHandle node, cameraConfig& config) override;
     dai::UsbSpeed getUSBSpeed(ros::NodeHandle node);
 
    private:

@@ -85,7 +85,7 @@ dai::Node::Input Segmentation::getInput(int linkType) {
     return imageManip->inputImage;
 }
 
-void Segmentation::updateParams(parametersConfig& config) {
+void Segmentation::updateParams(cameraConfig& config) {
     ph->setRuntimeParams(getROSNode(), config);
 }
 

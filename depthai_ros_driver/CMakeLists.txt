@@ -30,7 +30,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(depthai CONFIG REQUIRED)
 generate_dynamic_reconfigure_options(
-  cfg/parameters.cfg
+  cfg/camera.cfg
+  cfg/wls.cfg
 )
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
@@ -53,6 +54,7 @@ add_library(
   src/camera.cpp
   src/pipeline_generator.cpp
   src/nodelets/wls_filter.cpp
+  src/dai_nodes/sensors/sensor_helpers.cpp
   src/dai_nodes/sensors/imu.cpp
   src/dai_nodes/sensors/rgb.cpp
   src/dai_nodes/sensors/mono.cpp
