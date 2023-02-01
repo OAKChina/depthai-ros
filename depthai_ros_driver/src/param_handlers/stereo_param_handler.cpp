@@ -33,6 +33,14 @@ void StereoParamHandler::declareParams(rclcpp::Node* node, std::shared_ptr<dai::
     declareAndLogParam<int>(node, "i_max_q_size", 30);
     declareAndLogParam<bool>(node, "i_low_bandwidth", false);
     declareAndLogParam<int>(node, "i_low_bandwidth_quality", 50);
+    declareAndLogParam<bool>(node, "i_output_disparity", false);
+    declareAndLogParam<bool>(node, "i_publish_right_rect", false);
+    declareAndLogParam<bool>(node, "i_rect_right_low_bandwidth", false);
+    declareAndLogParam<int>(node, "i_rect_right_low_bandwidth_quality", 50);
+    declareAndLogParam<bool>(node, "i_publish_left_rect", false);
+    declareAndLogParam<bool>(node, "i_rect_left_low_bandwidth", false);
+    declareAndLogParam<int>(node, "i_rect_left_low_bandwidth_quality", 50);
+
     stereo->setLeftRightCheck(declareAndLogParam<bool>(node, "i_lr_check", true));
     if(declareAndLogParam<bool>(node, "i_align_depth", true)) {
         declareAndLogParam<int>(node, "i_board_socket_id", static_cast<int>(dai::CameraBoardSocket::RGB));

@@ -29,7 +29,6 @@ class Mono : public BaseNode {
     void closeQueues() override;
 
    private:
-    void monoQCB(const std::string& name, const std::shared_ptr<dai::ADatatype>& data);
     std::unique_ptr<dai::ros::ImageConverter> imageConverter;
     image_transport::CameraPublisher monoPub;
     sensor_msgs::msg::CameraInfo monoInfo;

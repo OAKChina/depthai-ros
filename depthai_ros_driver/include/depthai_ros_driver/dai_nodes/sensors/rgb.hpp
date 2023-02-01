@@ -30,7 +30,6 @@ class RGB : public BaseNode {
     void closeQueues() override;
 
    private:
-    void colorQCB(const std::string& name, const std::shared_ptr<dai::ADatatype>& data);
     std::unique_ptr<dai::ros::ImageConverter> imageConverter;
     image_transport::CameraPublisher rgbPub, previewPub;
     sensor_msgs::msg::CameraInfo rgbInfo, previewInfo;
