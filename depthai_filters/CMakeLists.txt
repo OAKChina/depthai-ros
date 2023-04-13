@@ -15,6 +15,7 @@ include_directories(include)
 ament_auto_add_library(
   ${PROJECT_NAME} SHARED
   src/detection2d_overlay.cpp
+  src/detection3d_overlay.cpp
   src/segmentation_overlay.cpp
   src/wls_filter.cpp
   src/utils.cpp
@@ -25,6 +26,7 @@ target_link_libraries(
   ${OpenCV_LIBRARIES}
 )
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::Detection2DOverlay")
+rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::Detection3DOverlay")
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::SegmentationOverlay")
 rclcpp_components_register_nodes(${PROJECT_NAME} "${PROJECT_NAME}::WLSFilter")
 ament_export_include_directories(include)

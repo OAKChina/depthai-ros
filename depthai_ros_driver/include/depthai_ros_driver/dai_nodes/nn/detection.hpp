@@ -35,7 +35,6 @@ class Detection : public BaseNode {
         ph = std::make_unique<param_handlers::NNParamHandler>(node, daiNodeName);
         ph->declareParams(detectionNode, imageManip);
         RCLCPP_DEBUG(node->get_logger(), "Node %s created", daiNodeName.c_str());
-        imageManip->out.link(detectionNode->input);
         setXinXout(pipeline);
     }
     ~Detection() = default;
@@ -74,6 +73,7 @@ class Detection : public BaseNode {
         if(ph->getParam<bool>("i_disable_resize")) {
             return detectionNode->input;
         }
+        imageManip->out.link(detectionNode->input);
         return imageManip->inputImage;
     };
     void setNames() override {

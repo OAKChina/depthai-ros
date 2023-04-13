@@ -1,0 +1,5 @@
+/oak:
+  ros__parameters:
+    nn:
+      i_enable_passthrough: true
+      i_disable_resize: true

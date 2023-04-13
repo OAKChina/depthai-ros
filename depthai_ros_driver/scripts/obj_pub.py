@@ -36,7 +36,7 @@ class ObjectPublisher(Node):
     def __init__(self):
         super().__init__('object_publisher')
         self._sub_ = self.create_subscription(
-            Detection3DArray, '/oak/nn/detections', self.publish_data, 10)
+            Detection3DArray, '/oak/nn/spatial_detections', self.publish_data, 10)
         self._det_pub = self.create_publisher(
             ImageMarkerArray, '/oak/nn/detection_markers', 10)
         self._text_pub = self.create_publisher(

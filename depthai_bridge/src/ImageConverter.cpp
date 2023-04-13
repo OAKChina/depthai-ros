@@ -103,7 +103,6 @@ void ImageConverter::toRosMsg(std::shared_ptr<dai::ImgFrame> inData, std::deque<
     ImageMsgs::Image outImageMsg;
     StdMsgs::Header header;
     header.frame_id = _frameName;
-
     header.stamp = getFrameTime(_rosBaseTime, _steadyBaseTime, tstamp);
 
     if(planarEncodingEnumMap.find(inData->getType()) != planarEncodingEnumMap.end()) {

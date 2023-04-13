@@ -41,6 +41,7 @@ void Stereo::setNames() {
 void Stereo::setXinXout(std::shared_ptr<dai::Pipeline> pipeline) {
     xoutStereo = pipeline->create<dai::node::XLinkOut>();
     xoutStereo->setStreamName(stereoQName);
+    xoutStereo->input.setBlocking(false);
     if(ph->getParam<bool>("i_low_bandwidth")) {
         videoEnc = sensor_helpers::createEncoder(pipeline, ph->getParam<int>("i_low_bandwidth_quality"));
         stereoCamNode->disparity.link(videoEnc->input);

@@ -35,13 +35,35 @@ class SpatialDetection : public BaseNode {
         ph = std::make_unique<param_handlers::NNParamHandler>(node, daiNodeName);
         ph->declareParams(spatialNode, imageManip);
         RCLCPP_DEBUG(node->get_logger(), "Node %s created", daiNodeName.c_str());
-        imageManip->out.link(spatialNode->input);
+        spatialNode->setBoundingBoxScaleFactor(0.5);
+        spatialNode->setDepthLowerThreshold(100);
+        spatialNode->setDepthUpperThreshold(5000);
         setXinXout(pipeline);
     }
     ~SpatialDetection() = default;
-    void updateParams(const std::vector<rclcpp::Parameter>& params) override {
-        ph->setRuntimeParams(params);
+        void setNames() override {
+        nnQName = getName() + "_nn";
+        ptQName = getName() + "_pt";
+        ptDepthQName = getName() + "_pt_depth";
     };
+    void setXinXout(std::shared_ptr<dai::Pipeline> pipeline) override {
+        xoutNN = pipeline->create<dai::node::XLinkOut>();
+        xoutNN->setStreamName(nnQName);
+        spatialNode->out.link(xoutNN->input);
+        spatialNode->input.setBlocking(false);
+        spatialNode->inputDepth.setBlocking(false);
+        if(ph->getParam<bool>("i_enable_passthrough")) {
+            xoutPT = pipeline->create<dai::node::XLinkOut>();
+            xoutPT->setStreamName(ptQName);
+            spatialNode->passthrough.link(xoutPT->input);
+        }
+        if(ph->getParam<bool>("i_enable_passthrough_depth")) {
+            xoutPTDepth = pipeline->create<dai::node::XLinkOut>();
+            xoutPTDepth->setStreamName(ptDepthQName);
+            spatialNode->passthroughDepth.link(xoutPTDepth->input);
+        }
+    };
+
     void setupQueues(std::shared_ptr<dai::Device> device) override {
         nnQ = device->getOutputQueue(nnQName, ph->getParam<int>("i_max_q_size"), false);
         auto tfPrefix = getTFPrefix("rgb");
@@ -96,34 +118,16 @@ class SpatialDetection : public BaseNode {
     };
     dai::Node::Input getInput(int linkType = 0) override {
         if(linkType == static_cast<int>(nn_helpers::link_types::SpatialNNLinkType::input)) {
-            if(ph->getParam<bool>("i_disable_resize")) {
+        if(ph->getParam<bool>("i_disable_resize")) {
                 return spatialNode->input;
             }
+            imageManip->out.link(spatialNode->input);
             return imageManip->inputImage;
         } else {
             return spatialNode->inputDepth;
         }
     };
-    void setNames() override {
-        nnQName = getName() + "_nn";
-        ptQName = getName() + "_pt";
-        ptDepthQName = getName() + "_pt_depth";
-    };
-    void setXinXout(std::shared_ptr<dai::Pipeline> pipeline) override {
-        xoutNN = pipeline->create<dai::node::XLinkOut>();
-        xoutNN->setStreamName(nnQName);
-        spatialNode->out.link(xoutNN->input);
-        if(ph->getParam<bool>("i_enable_passthrough")) {
-            xoutPT = pipeline->create<dai::node::XLinkOut>();
-            xoutPT->setStreamName(ptQName);
-            spatialNode->passthrough.link(xoutPT->input);
-        }
-        if(ph->getParam<bool>("i_enable_passthrough_depth")) {
-            xoutPTDepth = pipeline->create<dai::node::XLinkOut>();
-            xoutPTDepth->setStreamName(ptDepthQName);
-            spatialNode->passthroughDepth.link(xoutPTDepth->input);
-        }
-    };
+
     void closeQueues() override {
         nnQ->close();
         if(ph->getParam<bool>("i_enable_passthrough")) {
@@ -132,6 +136,9 @@ class SpatialDetection : public BaseNode {
         if(ph->getParam<bool>("i_enable_passthrough_depth")) {
             ptDepthQ->close();
         }
+    };
+    void updateParams(const std::vector<rclcpp::Parameter>& params) override {
+        ph->setRuntimeParams(params);
     };
 
    private:

@@ -26,9 +26,9 @@ def launch_setup(context, *args, **kwargs):
             composable_node_descriptions=[
                     ComposableNode(
                         package="depthai_filters",
-                        plugin="depthai_filters::Detection2DOverlay",
+                        plugin="depthai_filters::Detection3DOverlay",
                         remappings=[('rgb/preview/image_raw', name+'/nn/passthrough/image_raw'),
-                                    ('nn/detections', name+'/nn/detections')]
+                                    ('nn/spatial_detections', name+'/nn/spatial_detections')]
                     ),
             ],
         ),
@@ -41,7 +41,7 @@ def generate_launch_description():
 
     declared_arguments = [
         DeclareLaunchArgument("name", default_value="oak"),
-        DeclareLaunchArgument("params_file", default_value=os.path.join(depthai_filters_prefix, 'config', 'detection2d.yaml')),
+        DeclareLaunchArgument("params_file", default_value=os.path.join(depthai_filters_prefix, 'config', 'detection3d.yaml')),
     ]
 
     return LaunchDescription(
